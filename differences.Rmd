@@ -93,15 +93,16 @@ differences.bootstrap <- function(dsobj, flatfile, nboot) {
     colnames(extract) <- ests$individuals$D$Label
     return(extract)
   }
-  outcome <- bootdht(dsobj, flatfile=flatfile, 
+  outcome <- bootdht(dsobj, flatfile=flatfile, cores=10,
                      summary_fun=pullout.D, nboot=nboot)
 #   Having run the bootstrap, calculate number of pairwise comparisons btwn strata
 #     create objects to receive the replicate-wise differences for each comparison
 #     median differences are reported and empirical P-value computed for each comparison
 #     histograms of sampling distribution for differences are shown with CIs
+#  allstrata <- complete.cases(outcome)
   num.compare <- choose(num.strata, 2)
   pairs <- t(combn(1:num.strata, 2))
-  result.matrix <- matrix(data=NA, nrow=nboot, ncol=num.compare)
+  result.matrix <- matrix(data=NA, nrow=nrow(outcome), ncol=num.compare)
   themedian <- array(data=NA, dim=num.compare)
   pvalue <- array(data=NA, dim=num.compare)
   par(mfrow=c(num.compare, 1))
@@ -165,7 +166,7 @@ Another data set, `Savannah_sparrow_1980`, is derived from a point transect surv
 ```{r, sparrow, fig.height=7, fig.cap="Two strata with Region.Label as a covariate in detection function.", results='hide'}
 data("Savannah_sparrow_1980")
 hn.sparrow <- ds(Savannah_sparrow_1980, transect="point", key="hn", truncation="10%", 
-                 convert.units=convert_units("meter", NULL, "hectare"), formula=~Region.Label)
+                 convert_units=convert_units("meter", NULL, "hectare"), formula=~Region.Label)
 resultsparrow <- differences.bootstrap(hn.sparrow, 
                                        flatfile=Savannah_sparrow_1980, 
                                        nboot=250)
